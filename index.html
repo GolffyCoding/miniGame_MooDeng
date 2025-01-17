@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Menu</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bungee&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+            font-family: 'Bungee', cursive;
+        }
+        .menu, .game-container {
+            display: none;
+            text-align: center;
+        }
+        .menu {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .menu button {
+            font-size: 1.5em;
+            margin: 10px;
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background-color: #ff6347;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            width: 200px; /* ขนาดความกว้างปุ่ม */
+        }
+        .menu button:hover {
+            background-color: #ff4500;
+        }
+        #gameImage {
+            width: 500px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        img.clicked {
+            animation: funnyBounce 1s ease;
+        }
+        img.growing {
+            animation: none;
+            transform: scale(1.5); /* ขยายเมื่อกดค้าง */
+        }
+        @keyframes funnyBounce {
+            0% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(10deg); }
+            50% { transform: scale(0.8) rotate(-10deg); }
+            75% { transform: scale(1.5) rotate(20deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        #score {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #ff6347;
+            text-shadow: 2px 2px 0px #000;
+        }
+        #backButton {
+            font-size: 1.2em;
+            margin: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            border: none;
+            background-color: #ff6347;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            position: absolute; /* ทำให้ปุ่มอยู่ด้านบนของหน้าจอ */
+            top: 10px; /* ระยะห่างจากด้านบน */
+            left: 10px; /* ระยะห่างจากด้านซ้าย */
+        }
+        #backButton:hover {
+            background-color: #ff4500;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- หน้าจอเมนู -->
+    <div class="menu" id="menu">
+        <button onclick="showGame()">Play Mini Game</button>
+        <button onclick="alert('Leaderboard')">Leaderboard</button>
+        <button onclick="alert('Profile')">Profile</button>
+        <button onclick="alert('Settings')">Settings</button>
+        <button onclick="alert('Invite Friends')">Invite Friends</button>
+    </div>
+
+    <!-- หน้าจอเกม -->
+    <div class="game-container" id="gameContainer">
+        <button id="backButton">Back to Menu</button>
+        <div id="score">Score: 0</div>
+        <img src="./image/1.png" id="gameImage" alt="Clickable Image">
+        <audio id="backgroundMusic" src="./Funny.mp3" loop></audio>
+        <audio id="clickSound" src="./popcat.mp3"></audio>
+    </div>
+
+    <script>
+        const menu = document.getElementById('menu');
+        const gameContainer = document.getElementById('gameContainer');
+        const image = document.getElementById('gameImage');
+        const scoreDisplay = document.getElementById('score');
+        const music = document.getElementById('backgroundMusic');
+        const clickSound = document.getElementById('clickSound');
+        const backButton = document.getElementById('backButton');
+        let score = 0; // ตัวแปรเก็บคะแนน
+        let mouseMoved = false;
+        let clickCount = 0;
+        const clickLimit = 15; // จำกัดจำนวนคลิก 15 ครั้งใน 1 วินาที
+        let clickTimer;
+
+        // ฟังก์ชันสุ่มเปลี่ยนรูปภาพเมื่อคลิก
+        function getRandomImage() {
+            const randomNum = Math.floor(Math.random() * 6) + 1; // สุ่มเลข 1 ถึง 6
+            return `./image/${randomNum}.png`; // ส่งคืนพาธของรูปที่สุ่มได้
+        }
+
+        // ฟังก์ชันขยายภาพเมื่อกดค้าง
+        function growImage() {
+            image.classList.add('growing');
+        }
+
+        // ฟังก์ชันคืนค่าขนาดปกติเมื่อปล่อยเมาส์
+        function resetImageSize() {
+            image.classList.remove('growing');
+        }
+
+        // ฟังก์ชันเริ่มเกม
+        function showGame() {
+            menu.style.display = 'none';
+            gameContainer.style.display = 'block';
+        }
+
+        // ฟังก์ชันคืนค่าเมนู
+        function showMenu() {
+            gameContainer.style.display = 'none';
+            menu.style.display = 'flex'; // ใช้ flex เพื่อให้แน่ใจว่าแสดงในแนวตั้ง
+            // หยุดเพลงพื้นหลัง
+            if (!music.paused) {
+                music.pause();
+                music.currentTime = 0; // ตั้งค่าเวลาเริ่มต้นของเพลงเป็น 0
+            }
+        }
+
+        // ตรวจจับการเคลื่อนไหวของเมาส์
+        document.addEventListener('mousemove', () => {
+            mouseMoved = true;
+        });
+
+        image.addEventListener('click', () => {
+            if (!mouseMoved) {
+                alert('Please move your mouse!');
+                return;
+            }
+
+            const currentTime = new Date().getTime();
+            if (clickCount >= clickLimit) {
+                alert('Too many clicks!');
+                return;
+            }
+            
+            clickCount++;
+            
+            if (!clickTimer) {
+                clickTimer = setTimeout(() => {
+                    clickCount = 0; // รีเซ็ตจำนวนคลิกหลังจาก 1 วินาที
+                    clearTimeout(clickTimer);
+                    clickTimer = null;
+                }, 1000); // 1 วินาที
+            }
+
+            // เล่นเสียงคลิก
+            clickSound.play();
+
+            // เพิ่มคลาสเพื่อทำแอนิเมชันเด้ง
+            image.classList.add('clicked');
+
+            // เปลี่ยนรูปภาพหลังจากคลิก
+            image.src = getRandomImage();
+
+            // เล่นเพลงถ้ายังไม่ได้เล่น
+            if (music.paused) {
+                music.play();
+            }
+
+            // เพิ่มคะแนนและอัปเดตการแสดงผล
+            score++;
+            scoreDisplay.textContent = `Score: ${score}`;
+
+            setTimeout(() => {
+                // ลบคลาสเมื่อแอนิเมชันจบ
+                image.classList.remove('clicked');
+            }, 1000); // เวลาแอนิเมชันจบ (1 วินาที)
+        });
+
+        // เพิ่มการขยายภาพเมื่อกดค้าง
+        image.addEventListener('mousedown', growImage);
+        // คืนค่าขนาดปกติเมื่อปล่อยเมาส์หรือเม้าส์ออกจากภาพ
+        image.addEventListener('mouseup', resetImageSize);
+        image.addEventListener('mouseleave', resetImageSize);
+
+        // เพิ่มการทำงานให้กับปุ่ม "กลับ"
+        backButton.addEventListener('click', showMenu);
+
+        // แสดงเมนูเริ่มต้นเมื่อโหลดหน้าเว็บ
+        window.onload = () => {
+            showMenu();
+        }
+    </script>
+
+</body>
+</html>

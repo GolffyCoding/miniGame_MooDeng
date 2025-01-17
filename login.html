@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login and Create Account</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f0f0f0;
+        font-family: "Roboto", sans-serif;
+      }
+      .container {
+        background: white;
+        padding: 2em;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        width: 300px;
+        text-align: center;
+      }
+      .container h1 {
+        margin: 0 0 1em;
+        font-size: 1.5em;
+      }
+      .container input {
+        width: 100%;
+        padding: 0.8em;
+        margin: 0.5em 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+      .container button {
+        width: 100%;
+        padding: 0.8em;
+        background-color: #007bff;
+        border: none;
+        border-radius: 4px;
+        color: white;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .container button:hover {
+        background-color: #0056b3;
+        color: #f0f0f0;
+      }
+      .container .message {
+        color: red;
+        font-size: 0.9em;
+      }
+      .container .checkbox-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 1em 0;
+      }
+      .container .checkbox-label {
+        margin-right: 0.5em;
+      }
+      .container .form-container {
+        display: none;
+      }
+      .container .form-container.active {
+        display: block;
+      }
+      .container .toggle-button {
+        margin-top: 1em;
+        cursor: pointer;
+        color: #007bff;
+        border: none;
+        background: none;
+        font-size: 1em;
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="loginFormContainer" class="form-container active">
+        <h1>Login</h1>
+        <form id="loginForm">
+          <input type="email" id="loginEmail" placeholder="Email" required />
+          <input
+            type="password"
+            id="loginPassword"
+            placeholder="Password"
+            required
+          />
+          <div class="checkbox-label">
+            <input type="checkbox" id="rememberMe" />
+            <label for="rememberMe">Remember me</label>
+          </div>
+          <button type="submit">Login</button>
+          <div class="message" id="loginMessage"></div>
+        </form>
+        <button id="showCreateAccount" class="toggle-button">
+          Create Account
+        </button>
+      </div>
+
+      <div id="createAccountFormContainer" class="form-container">
+        <h1>Create Account</h1>
+        <form id="createAccountForm">
+          <input
+            type="text"
+            id="createUsername"
+            placeholder="Username"
+            required
+          />
+          <input type="email" id="createEmail" placeholder="Email" required />
+          <input
+            type="password"
+            id="createPassword"
+            placeholder="Password"
+            required
+          />
+          <button type="submit">Create Account</button>
+          <div class="message" id="createMessage"></div>
+        </form>
+        <button id="showLogin" class="toggle-button">Login</button>
+      </div>
+    </div>
+
+    <script>
+      const createAccountForm = document.getElementById("createAccountForm");
+      const loginForm = document.getElementById("loginForm");
+      const createEmailInput = document.getElementById("createEmail");
+      const createPasswordInput = document.getElementById("createPassword");
+      const loginEmailInput = document.getElementById("loginEmail");
+      const loginPasswordInput = document.getElementById("loginPassword");
+      const rememberMeCheckbox = document.getElementById("rememberMe");
+      const createMessage = document.getElementById("createMessage");
+      const loginMessage = document.getElementById("loginMessage");
+      const showCreateAccountButton =
+        document.getElementById("showCreateAccount");
+      const showLoginButton = document.getElementById("showLogin");
+      const loginFormContainer = document.getElementById("loginFormContainer");
+      const createAccountFormContainer = document.getElementById(
+        "createAccountFormContainer"
+      );
+      const createUsernameInput = document.getElementById("createUsername");
+
+      const scriptUrl =
+        "https://script.google.com/macros/s/AKfycbxw5yrzwSsiOuhgibuKGfGBBuIQQVaCUSNQxAP4jYGLsvIqwRwOXYNYrr1qfiAZBZ6z/exec"; // เปลี่ยนเป็น URL ของ Google Apps Script
+
+      createAccountForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const username = createUsernameInput.value.trim();
+        const email = createEmailInput.value.trim();
+        const password = createPasswordInput.value.trim();
+
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+
+        const urlencoded = new URLSearchParams();
+        urlencoded.append("action", "create");
+        urlencoded.append("username", username);
+        urlencoded.append("email", email);
+        urlencoded.append("password", password);
+
+        const requestOptions = {
+          method: "POST",
+          headers: myHeaders,
+          body: urlencoded,
+          redirect: "follow",
+        };
+
+        fetch(
+          "https://script.google.com/macros/s/AKfycbwgTyAysSj8bxJhFLw_pHHFusBT38gvyG_Lvhml9a8B5vy14_B0BACx8tvDU8QrEf0w/exec",
+          requestOptions
+        )
+          .then((response) => response.json())
+          .then((result) => console.log(result))
+          .catch((error) => console.error(error));
+      });
+
+      loginForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const email = loginEmailInput.value.trim();
+        const password = loginPasswordInput.value.trim();
+        const rememberMe = rememberMeCheckbox.checked;
+
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
+
+        const urlencoded = new URLSearchParams();
+        urlencoded.append("action", "login");
+        urlencoded.append("email", email);
+        urlencoded.append("password", password);
+
+        const requestOptions = {
+          method: "POST",
+          headers: myHeaders,
+          body: urlencoded,
+          redirect: "follow",
+        };
+        // Convert URLSearchParams to an object
+        const urlencodedObj = Object.fromEntries(urlencoded.entries());
+        console.log(urlencodedObj);
+
+        // If you want it in JSON format
+        console.log(JSON.stringify(urlencodedObj));
+
+        fetch(
+          "https://script.google.com/macros/s/AKfycbwgTyAysSj8bxJhFLw_pHHFusBT38gvyG_Lvhml9a8B5vy14_B0BACx8tvDU8QrEf0w/exec",
+          requestOptions
+        )
+          .then((response) => response.json())
+          .then((result) => console.log(result))
+          .catch((error) => console.error(error));
+      });
+
+      showCreateAccountButton.addEventListener("click", () => {
+        loginFormContainer.classList.remove("active");
+        createAccountFormContainer.classList.add("active");
+      });
+
+      showLoginButton.addEventListener("click", () => {
+        createAccountFormContainer.classList.remove("active");
+        loginFormContainer.classList.add("active");
+      });
+
+      // ตรวจสอบสถานะการเข้าสู่ระบบเมื่อโหลดหน้า
+      window.addEventListener("load", () => {
+        const storedEmail = localStorage.getItem("email");
+        const storedPassword = localStorage.getItem("password");
+
+        if (storedEmail && storedPassword) {
+          loginEmailInput.value = storedEmail;
+          loginPasswordInput.value = storedPassword;
+          rememberMeCheckbox.checked = true;
+        }
+      });
+    </script>
+  </body>
+</html>
